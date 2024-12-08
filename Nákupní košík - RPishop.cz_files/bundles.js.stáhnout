@@ -1,0 +1,34 @@
+jQuery(document).ready(function($){
+
+    $(document).on('click', '.js-add-bundle-to-cart', function (e) {
+        e.preventDefault();
+
+        let btn = $(this),
+            product_id = btn.data('product-id'),
+            bundle_id = btn.data('bundle-id');
+
+        let data = {
+            action: 'add_bundle_to_cart',
+            product_id: product_id,
+            bundle_id: bundle_id,
+        };
+
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: data,
+            beforeSend: function(){
+                $('.rpi-ajax-loader').addClass('loading');
+            },
+            success: function (response) {
+                window.scrollTo(0, 0);
+
+                location.reload();
+            },
+            complete: function(){
+                $('.rpi-ajax-loader').removeClass('loading');
+            },
+        });
+    });
+
+});

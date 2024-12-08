@@ -1,0 +1,35 @@
+jQuery(function ($) {
+    $('.bapf_body li input').change(function (e) {
+        $('#load-more-ajax').remove();
+    });
+    
+    $('#load-more-ajax').click(function () {
+        let button = $(this),
+            data = {
+                'action': 'load_more_products',
+                'query': load_params.posts,
+                'page': load_params.current_page
+            };
+
+        $.ajax({
+            url: load_params.ajaxurl,
+            data: data,
+            type: 'POST',
+            beforeSend: function (xhr) {
+                button.text('Načítám...');
+            },
+            success: function (data) {
+                if (data) {
+                    button.text('Načíst další')
+                    $('.products-holder ul').append(data.html);
+                    load_params.current_page++;
+
+                    if (data.html == '' || load_params.current_page == load_params.max_page)
+                        button.remove();
+                } else {
+                    button.remove();
+                }
+            }
+        });
+    });
+});

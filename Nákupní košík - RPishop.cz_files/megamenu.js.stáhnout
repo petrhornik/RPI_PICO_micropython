@@ -1,0 +1,180 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const topMenuItems = document.querySelectorAll('.mega-menu > li');
+
+    topMenuItems.forEach(item => {
+        item.addEventListener('mouseenter', function(event) {
+            if (event.target.getAttribute('data-fetched')) {
+                return;
+            }
+            event.target.setAttribute('data-fetched', 'true');
+
+            const menuId = this.dataset.menuId;
+            if (menuId) {
+                fetchSubmenu(menuId, this);
+            }
+        });
+    });
+});
+
+function fetchSubmenu(menuId, parentElement) {
+    const url = `https://rpishop.cz/wp-json/rpishop/v1/megamenu/${menuId}`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(submenuData => {
+            const submenuElement = createSubmenu(submenuData);
+            parentElement.appendChild(submenuElement);
+            //attachSubmenuEventListeners(submenuElement); // Attach event listeners to new submenu items
+        })
+        .catch(error => console.error('Error loading submenu:', error));
+}
+
+function createSubmenu(submenuData) {
+    // Create the main container for the submenu
+    const submenuDiv = document.createElement('div');
+    submenuDiv.className = 'menu-item-submenu active';
+
+	if (submenuData.is_multi) {
+	    // Add 'multi' class to the main submenu container
+	    submenuDiv.classList.add('multi');
+	    if (submenuData.banner && submenuData.banner.banner_img) {
+	        submenuDiv.classList.add('has-banner');
+	    }
+	
+	    // Create the tabs navigation container
+	    const tabsUl = document.createElement('ul');
+	    tabsUl.className = 'multi-menu-nav';
+	
+	    // Create the container for the tab content
+	    const tabContentContainer = document.createElement('div');
+	    tabContentContainer.className = 'multi-menu-content';
+	
+	    // Loop through each top-level item to create the tabs
+	    submenuData.sub.forEach((topLevelItem, index) => {
+	        // Create the tab button
+	        const tabLi = document.createElement('li');
+	        tabLi.className = `multi-tab-btn ${index === 0 ? 'active' : ''}`;
+	        tabLi.setAttribute('data-multi-tab', index);
+	        tabLi.setAttribute('data-menu-id', topLevelItem.ID); // Set data-menu-id to the ID of the submenu item
+	
+	        const tabLink = document.createElement('a');
+	        tabLink.href = topLevelItem.url;
+	        tabLink.textContent = topLevelItem.title;
+	
+	        tabLi.appendChild(tabLink);
+	        tabsUl.appendChild(tabLi);
+	
+	        // Create the tab content area
+	        const tabContent = document.createElement('div');
+	        tabContent.className = `multi-tab-content multi-tab-${index}`;
+	        if (index === 0) {
+	            tabContent.classList.add('active');
+	            createSubmenuChildren(topLevelItem.children, tabContent);
+	        } else {
+	            createSubmenuChildren(topLevelItem.children, tabContent);
+	        }
+	        tabContentContainer.appendChild(tabContent);
+	
+	        // Attach mouseenter event to each tab button
+	        tabLi.addEventListener('mouseenter', function() {
+	            // Remove 'active' class from all tabs and their content
+	            tabsUl.querySelectorAll('.multi-tab-btn').forEach(tab => {
+	                tab.classList.remove('active');
+	            });
+	            tabContentContainer.querySelectorAll('.multi-tab-content').forEach(content => {
+	                content.classList.remove('active');
+	            });
+	
+	            // Add 'active' class to the current tab and its content
+	            this.classList.add('active');
+	            tabContent.classList.add('active');
+	
+	        });
+	    });
+	
+	    // Append the tabs navigation and content container to the main submenu container
+	    submenuDiv.appendChild(tabsUl);
+	    submenuDiv.appendChild(tabContentContainer);
+	}
+     else {
+        // Handle single-level submenu as before
+        const submenuCategoriesDiv = document.createElement('div');
+        submenuCategoriesDiv.className = 'menu-submenu-categories';
+
+        // Loop through submenu data and create submenu items
+        submenuData.sub.forEach(subItem => {
+            const menuItemCategoryDiv = document.createElement('div');
+            menuItemCategoryDiv.className = 'menu-item-category';
+
+            const subLink = document.createElement('a');
+            subLink.href = subItem.url;
+            subLink.className = 'menu-item-submenu-link';
+
+            if (subItem.image) {
+                const image = document.createElement('img');
+                image.src = subItem.image;
+                image.className = 'menu-item-submenu-image';
+                subLink.appendChild(image);
+            }
+
+            const span = document.createElement('span');
+            span.textContent = subItem.title;
+            subLink.appendChild(span);
+
+            menuItemCategoryDiv.appendChild(subLink);
+            submenuCategoriesDiv.appendChild(menuItemCategoryDiv);
+        });
+
+        submenuDiv.appendChild(submenuCategoriesDiv);
+    }
+
+    if (submenuData.banner && submenuData.banner.banner_img) {
+        const bannerDiv = document.createElement('div');
+        bannerDiv.className = 'submenu-banner';
+        const bannerLink = document.createElement('a');
+        bannerLink.href = submenuData.banner.banner_link;
+        const bannerImage = document.createElement('img');
+        bannerImage.src = submenuData.banner.banner_img.url;
+        bannerLink.appendChild(bannerImage);
+        bannerDiv.appendChild(bannerLink);
+        submenuDiv.appendChild(bannerDiv);
+    }
+
+    return submenuDiv;
+}
+
+
+// Function to create submenu children HTML structure
+function createSubmenuChildren(children, container) {
+    // Clear previous content
+    container.innerHTML = '';
+
+    // Check if there are child items
+    if (children && children.length > 0) {
+        children.forEach(child => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'menu-item-category';
+
+            const submenuLink = document.createElement('a');
+            submenuLink.href = child.url; // URL of the child item
+            submenuLink.className = 'menu-item-submenu-link';
+
+            if (child.image) {
+                const image = document.createElement('img');
+                image.src = child.image; // Source of the child item's image
+                image.className = 'menu-item-submenu-image';
+                submenuLink.appendChild(image);
+            }
+
+            const span = document.createElement('span');
+            span.textContent = child.title; // Title of the child item
+            submenuLink.appendChild(span);
+
+            categoryDiv.appendChild(submenuLink);
+            container.appendChild(categoryDiv);
+        });
+    } else {
+        // Handle case where there are no children
+        container.textContent = 'No submenu items available.';
+    }
+}

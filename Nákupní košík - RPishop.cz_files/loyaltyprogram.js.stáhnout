@@ -1,0 +1,82 @@
+jQuery(document).ready(function($){
+    $('[data-use-points-all-btn]').click(function (e) {
+        let points = $(this).data('all-points');
+
+        const ele = $(this).parent();
+
+        ele.find('input[name=points]').val(points);
+
+        setTimeout(function(){
+            $('[data-use-points-btn]').trigger('click');
+        }, 100);
+    });
+
+    $('[data-cancel-points-btn]').click(function (e) {
+        e.preventDefault();
+
+        usePoints(0);
+    });
+
+    $('[data-use-points-btn]').click(function (e) {
+        e.preventDefault();
+
+        const points = $(this).parent().find('input[name=points]').val();
+
+        usePoints(points);
+    });
+
+
+    $('[data-cancel-points-btn-checkout]').click(function (e) {
+        e.preventDefault();
+
+        const el = $(this).parent();
+
+        usePoints(0);
+
+        setTimeout(function(){
+            $('body').trigger('update_checkout');
+
+            el.remove();
+        }, 1000);
+    });
+
+    function usePoints(points) {
+        let data = {
+            action: 'use_loyalty_points',
+            points: points
+        };
+
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: data,
+            beforeSend: function(){
+                $('.rpi-ajax-loader').addClass('loading');
+            },
+            complete: function(){
+                $('.rpi-ajax-loader').removeClass('loading');
+            },
+            success: function (response) {
+                if (response.hasPoints) {
+                    $('#button-cancel-points').show();
+                } else {
+                    $('#button-cancel-points').hide();
+                }
+
+                $('#use-points-input').val(response.points || 0);
+
+                Swal.fire({
+                    title: response.message,
+                    icon: response.type,
+                    toast: true,
+                    timer: 2000,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    customClass: {
+                        'title': 'mb-4'
+                    }
+                });
+            },
+        });
+    }
+});

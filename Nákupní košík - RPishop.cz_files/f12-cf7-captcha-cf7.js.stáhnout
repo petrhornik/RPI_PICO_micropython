@@ -1,0 +1,152 @@
+/**
+ * Reload all Captchas
+ * This will regenerate the Hash and the Captcha Value
+ */
+window.f12cf7captcha_cf7 = {
+    /**
+     * Reload Captchas
+     */
+    reloadAllCaptchas: function () {
+       jQuery(document).find('.f12c').each(function () {
+           window.f12cf7captcha_cf7.reloadCaptcha(jQuery(this));
+        });
+    },
+
+    /**
+     * Reload Captchas
+     */
+    reloadCaptcha: function (e) {
+        e.closest('.f12-captcha').find('.f12c').each(function () {
+            var input_id = jQuery(this).attr('id');
+            var hash_id = 'hash_' + input_id;
+
+            var hash = jQuery('#' + hash_id);
+            var label = e.closest('.f12-captcha').find('.c-data');
+            var method = jQuery(this).attr('data-method');
+
+            jQuery.ajax({
+                type: 'POST',
+                url: f12_cf7_captcha.ajaxurl,
+                data: {
+                    action: 'f12_cf7_captcha_reload',
+                    captchamethod: method
+                },
+                success: function (data, textStatus, XMLHttpRequest) {
+                    data = JSON.parse(data);
+
+                    if (method == 'image') {
+                        label.find('.captcha-image').html(data.label);
+                    }
+                    if (method == 'math') {
+                        label.find('.captcha-calculation').html(data.label);
+                    }
+                    hash.val(data.hash);
+                },
+                error: function (XMLHttpRequest, textstatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });
+        });
+    },
+
+    /**
+     * Reload Timer
+     */
+    reloadTimer: function () {
+        jQuery(document).find('.f12t').each(function () {
+            var fieldname = 'f12_timer';
+            var field = jQuery(this).find('.' + fieldname);
+
+            jQuery.ajax({
+                type: 'POST',
+                url: f12_cf7_captcha.ajaxurl,
+                data: {
+                    action: 'f12_cf7_captcha_timer_reload'
+                },
+                success: function (data, textStatus, XMLHttpRequest) {
+                    data = JSON.parse(data);
+                    field.val(data.hash);
+                },
+                error: function (XMLHttpRequest, textstatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });
+        });
+    },
+    /**
+     * Init
+     */
+    init: function () {
+        /**
+         * Reload the Captcha by User
+         * @param document
+         */
+        jQuery(document).on('click', '.cf7.captcha-reload', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.f12cf7captcha_cf7.reloadCaptcha(jQuery(this));
+            //window.f12cf7captcha_cf7.reloadTimer();
+        });
+
+        /**
+         * Add timer information when the user clicks on the submit button so we can check the time the user needs
+         * from displaying the form to submit
+         */
+        jQuery(document).on('click', 'button[type=submit], input[type="submit"]', function () {
+            // Get the current timestamp in milliseconds using Date.now()
+            var timestamp = Date.now();
+
+            // Combine the timestamp and date milliseconds to create a JavaScript microtime value
+            var js_microtime = timestamp / 1000;
+
+            jQuery(this).closest('form').find('.js_end_time').val(js_microtime)
+        });
+
+        /**
+         * Add timer information when the form has been loaded
+         */
+        jQuery(document).ready(function () {
+            // Get the current timestamp in milliseconds using Date.now()
+            var timestamp = Date.now();
+
+            // Combine the timestamp and date milliseconds to create a JavaScript microtime value
+            var js_microtime = (timestamp / 1000);
+
+            jQuery(document).find('form').each(function () {
+                jQuery(this).find('.js_start_time').val(js_microtime);
+            });
+        });
+
+        /**
+         * Add Event Listener from Contact Form 7
+         */
+        var wpcf7Elm = document.querySelector('.wpcf7');
+
+        if (typeof (wpcf7Elm) === 'undefined' || wpcf7Elm === null) {
+            return;
+        }
+
+        wpcf7Elm.addEventListener('wpcf7mailsent', function (event) {
+            window.f12cf7captcha_cf7.reloadAllCaptchas();
+            window.f12cf7captcha_cf7.reloadTimer();
+        }, false);
+
+        wpcf7Elm.addEventListener('wpcf7submit', function (event) {
+            window.f12cf7captcha_cf7.reloadAllCaptchas();
+            window.f12cf7captcha_cf7.reloadTimer();
+        }, false);
+
+        wpcf7Elm.addEventListener('wpcf7spam', function (event) {
+            var id = event.detail.apiResponse.into;
+
+            if (typeof (id) === 'undefined') {
+                return;
+            }
+
+            jQuery(id).find('.f12c').addClass('wpcf7-not-valid not-valid');
+        }, false);
+    }
+}
+
+window.f12cf7captcha_cf7.init();

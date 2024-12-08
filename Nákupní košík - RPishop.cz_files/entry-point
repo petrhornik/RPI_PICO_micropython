@@ -1,0 +1,6 @@
+var supportBoxChatConfig = {
+    endPoint: 'wss://chat.sbservers.cz',
+    applicationPoint: 'https://chat.supportbox.cz',
+    version: '43d69c065b'
+};
+!function(){var e=document.createElement("script");e.setAttribute("src","https://chat.supportbox.cz/assets/webChat.js?ver=43d69c065b"),document.head.appendChild(e)}();

@@ -1,0 +1,75 @@
+jQuery(document).ready(function($){
+
+    $(document).on('click', '.btn-compare', function (e) {
+        e.preventDefault();
+
+        let btn = $(this),
+            product_id = btn.data('product-id');
+
+        let data = {
+            action: 'add_to_compare',
+            product_id: product_id,
+        };
+
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: data,
+            beforeSend: function(){
+                $('.rpi-ajax-loader').addClass('loading');
+            },
+            complete: function(){
+                $('.rpi-ajax-loader').removeClass('loading');
+            },
+            success: function (response) {
+                if (response.error){
+                    Swal.fire({
+                        title: response.message,
+                        icon: 'error',
+                        toast: true,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        showCloseButton: true,
+                    });
+                }
+                
+                if (response.success){
+                    response.inCompare ? btn.addClass('in-compare').find('span').text('Odebrat') : btn.removeClass('in-compare').find('span').text('Porovnat');
+                    $('.JS_compare_count').attr('data-count', response.count);
+                }
+            },
+        });
+    });
+
+    $(document).on('click', '.btn-compare-remove', function (e) {
+        e.preventDefault();
+
+        product_id = $(this).data('product-id');
+
+        let item = $(this).closest('.compare-item');
+
+        let data = {
+            action: 'remove_from_compare',
+            product_id: product_id,
+        };
+
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: data,
+            beforeSend: function(){
+                $('.rpi-ajax-loader').addClass('loading');
+            },
+            complete: function(){
+                $('.rpi-ajax-loader').removeClass('loading');
+            },
+            success: function (response) {
+                if (response.success){
+                    $('.compare-content').html(response.html);
+                    $('.JS_compare_count').attr('data-count', response.count);
+                }
+            },
+        });
+    });
+
+});

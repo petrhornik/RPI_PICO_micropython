@@ -1,0 +1,75 @@
+jQuery(document).ready(function($){
+
+    $(document).on('click', '.btn-wishlist', function (e) {
+        e.preventDefault();
+
+        let btn = $(this);
+        let product_id = btn.data('product-id');
+
+        let data = {
+            action: 'add_to_wishlist',
+            product_id: product_id,
+        };
+
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: data,
+            beforeSend: function(){
+                $('.rpi-ajax-loader').addClass('loading');
+            },
+            complete: function(){
+                $('.rpi-ajax-loader').removeClass('loading');
+            },
+            success: function (response) {
+                if (response.error){
+                    Swal.fire({
+                        title: response.message,
+                        icon: 'error',
+                        toast: true,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        showCloseButton: true,
+                    });
+                }
+                
+                if (response.success){
+                    response.inWishlist ? btn.addClass('in-wishlist') : btn.removeClass('in-wishlist');
+                    $('.JS_wishlist_count').attr('data-count', response.count);
+                }
+            },
+        });
+    });
+
+    $(document).on('click', '.btn-wishlist-remove', function (e) {
+        e.preventDefault();
+
+        product_id = $(this).data('product-id');
+
+        let item = $(this).closest('.wishlist-item');
+
+        let data = {
+            action: 'remove_from_wishlist',
+            product_id: product_id,
+        };
+
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: data,
+            beforeSend: function(){
+                $('.rpi-ajax-loader').addClass('loading');
+            },
+            complete: function(){
+                $('.rpi-ajax-loader').removeClass('loading');
+            },
+            success: function (response) {
+                if (response.success){
+                    item.remove();
+                    $('.JS_wishlist_count').attr('data-count', response.count);
+                }
+            },
+        });
+    });
+
+});

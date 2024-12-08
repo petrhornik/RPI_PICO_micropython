@@ -1,0 +1,648 @@
+jQuery(document).ready(function ($) {
+
+    refreshMiniCart();
+
+    function extractCurrencyFromClassList(classList) {
+        const currencyRegex = /currency-([a-zA-Z]{3})/;
+        const match = classList.match(currencyRegex);
+
+        if (match && match.length > 1) {
+            return match[1].toUpperCase();
+        }
+
+        return 'CZK';
+    }
+
+    const bodyClass = document.body.classList.value;
+    const currencyCode = extractCurrencyFromClassList(bodyClass);
+
+    function refreshMiniCart() {
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: {
+                action: 'load_mini_cart',
+            },
+            success: function (response) {
+                $('.header-btn.header-cart').html(response.html);
+            }
+        });
+    }
+
+    $('.brand-slider-carousel').owlCarousel({
+        margin: 20,
+        stagePadding: 20,
+        nav: true,
+        dots: false,
+        loop: true,
+        autoplay: true,
+        autoplayTimeout: 3000,
+        responsive: {
+            480: {
+                items: 3
+            },
+            768: {
+                items: 6
+            }
+        }
+    });
+
+    $(document).on('click', '.quantity-plus-minus .plus', function () {
+        var quantityInput = $(this).closest('.quantity').find('.qty');
+        var quantity = parseInt(quantityInput.val());
+        quantityInput.val(quantity + 1).change();
+
+        update_cart();
+    });
+
+    $(document).on('click', '.quantity-plus-minus .minus', function () {
+        var quantityInput = $(this).closest('.quantity').find('.qty');
+        var quantity = parseInt(quantityInput.val());
+        if (quantity > 1) {
+            quantityInput.val(quantity - 1).change();
+        }
+
+        update_cart();
+    });
+
+    $(document).on('click', '.header-menu-btn .header-btn-link', function (e) {
+        e.preventDefault();
+        $('.header-nav').toggleClass('show');
+    });
+
+    $(document).on('change', '.qty', function () {
+        $('button[name="update_cart"]').trigger('click');
+    });
+
+    function goToStep(step) {
+        $('.form-checkout-step').css('display', 'none');
+        $('.order-step-block').removeClass('active');
+        $('#step-' + step).css('display', 'block');
+        $('#order-step-' + step).addClass('active');
+        window.scrollTo(0, 0);
+    }
+
+    $(document).on('click', '[data-go-step]', function () {
+        let step = $(this).data('go-step');
+        goToStep(step);
+    });
+
+
+    // Validate checkout fields
+    $(document).on('click', '[data-validate-checkout]', function () {
+        $('.woocommerce-NoticeGroup-checkout').remove();
+        $('.form-checkout-errors').html('');
+
+        let errors = [];
+        let errorFields = [];
+
+        if ($('.checkout #billing_first_name').val() === '') {
+            errors.push('<b>Fakturační Křestní jméno</b> je povinné pole.');
+            errorFields.push('billing_first_name');
+        }
+
+        if ($('.checkout #billing_last_name').val() === '') {
+            errors.push('<b>Fakturační Příjmení</b> je povinné pole.');
+            errorFields.push('billing_last_name');
+        }
+
+        if ($('.checkout #billing_phone').val() === '') {
+            errors.push('<b>Fakturační Telefon</b> je povinné pole.');
+            errorFields.push('billing_phone');
+        }
+
+        if ($('.checkout #billing_email').val() === '') {
+            errors.push('<b>Fakturační E-mailová adresa</b> je povinné pole.');
+            errorFields.push('billing_email');
+        }
+
+        if ($('.checkout #billing_address_1').val() === '') {
+            errors.push('<b>Fakturační Ulice a č.p.</b> je povinné pole.');
+            errorFields.push('billing_address_1');
+        }
+
+        if ($('.checkout #billing_city').val() === '') {
+            errors.push('<b>Fakturační Město</b> je povinné pole.');
+            errorFields.push('billing_city');
+        }
+
+        if ($('.checkout #billing_postcode').val() === '') {
+            errors.push('<b>Fakturační PSČ</b> je povinné pole.');
+            errorFields.push('billing_postcode');
+        }
+
+        if ($('.checkout #billing_country').val() === '') {
+            errors.push('<b>Fakturační Země</b> je povinné pole.');
+            errorFields.push('billing_country');
+        }
+
+        if ($('.checkout #billing_iscomp').is(':checked') && $('.checkout #billing_company').val() === '') {
+            errors.push('<b>Název firmy</b> je povinné pole.');
+            errorFields.push('billing_company');
+        }
+
+        if ($('.checkout #billing_iscomp').is(':checked') && $('.checkout #billing_ic').val() === '') {
+            errors.push('<b>IČO</b> je povinné pole.');
+            errorFields.push('billing_ic');
+        }
+
+        if ($('.checkout #ship-to-different-address-checkbox').is(':checked')) {
+            if ($('.checkout #shipping_first_name').val() === '') {
+                errors.push('<b>Doručovací Křestní jméno</b> je povinné pole.');
+                errorFields.push('shipping_first_name');
+            }
+
+            if ($('.checkout #shipping_last_name').val() === '') {
+                errors.push('<b>Doručovací Příjmení</b> je povinné pole.');
+                errorFields.push('shipping_last_name');
+            }
+
+            if ($('.checkout #shipping_address_1').val() === '') {
+                errors.push('<b>Doručovací Ulice a č.p.</b> je povinné pole.');
+                errorFields.push('shipping_address_1');
+            }
+
+            if ($('.checkout #shipping_city').val() === '') {
+                errors.push('<b>Doručovací Město</b> je povinné pole.');
+                errorFields.push('shipping_city');
+            }
+
+            if ($('.checkout #shipping_postcode').val() === '') {
+                errors.push('<b>Doručovací PSČ</b> je povinné pole.');
+                errorFields.push('shipping_postcode');
+            }
+
+            if ($('.checkout #shipping_country').val() === '') {
+                errors.push('<b>Doručovací Země</b> je povinné pole.');
+                errorFields.push('shipping_country');
+            }
+        }
+
+        let foxentryInvalid = $('.foxentry-input-invalid');
+
+        if (foxentryInvalid.length > 0) {
+            errors.push('Zkontrolujte prosím všechna pole.');
+
+            foxentryInvalid.each(function () {
+                $(this).closest('.form-row').removeClass('woocommerce-validated').addClass('woocommerce-invalid');
+            });
+
+            $('.foxentry-input-msg').each(function () {
+                $(this).addClass('foxentry-input-msg-visible');
+            });
+        }
+
+        let foxentryWarning = $('.foxentry-input-warning');
+
+        if (foxentryWarning.length > 0) {
+            let hasFoxentryAddressError = false;
+
+            foxentryWarning.each(function() {
+                if ($(this).hasClass('foxentry-input-address')) {
+                    hasFoxentryAddressError = true;
+                }
+            });
+
+            if (hasFoxentryAddressError) {
+                // currently disabled due to Foxentry listings not being available
+                //errors.push('Zkontrolujte prosím Vaši fakturační nebo doručovací adresu.');
+            }
+        }
+
+        if (errorFields.length > 0) {
+            errorFields.forEach(function (field) {
+                $('#' + field + '_field').addClass('woocommerce-invalid');
+            });
+        }
+
+        if (errors.length > 0) {
+            $('.form-checkout-errors').html('<ul class="woocommerce-error" role="alert">' + errors.map(function (error) {
+                return '<li>' + error + '</li>';
+            }).join('') + '</ul>');
+
+            window.scrollTo(0, 0);
+            return false;
+        }
+
+        $(document.body).trigger('update_checkout');
+
+        goToStep('shipping-payment');
+    });
+
+    $(document).on('click', '[data-validate-shipping]', function (e) {
+        e.preventDefault();
+
+        $('.form-checkout-errors').html('');
+
+        let errors = [];
+
+        if ($('.checkout #shipping_method_0_ppl_parcel69').is(':checked') &&
+            ($('input[name="parcelshop_id"]').val() === '' || jQuery('input[name="parcelshop_id"]').val() === undefined)) {
+            errors.push('Vyberte prosím <b>Parcelshop</b>');
+        }
+
+        if ($('.checkout #shipping_method_0_packetery_shipping_methodpacketery_carrier_zpointcz').is(':checked') && $('.checkout #packetery_point_id').val() === '') {
+            errors.push('Vyberte prosím <b>výdejní místo.</b>');
+        }
+
+        if ($('select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]').length === 0) {
+            errors.push('Vyberte prosím <b>způsob dopravy.</b>');
+        }
+
+        if ($('.checkout input[name=payment_method]:checked').length === 0) {
+            errors.push('Vyberte prosím <b>způsob platby.</b>');
+        }
+
+        if (errors.length > 0) {
+            $('.form-checkout-errors').html('<ul class="woocommerce-error" role="alert">' + errors.map(function (error) {
+                return '<li>' + error + '</li>';
+            }).join('') + '</ul>');
+
+            window.scrollTo(0, 0);
+            return false;
+        }
+
+        goToStep('review');
+    });
+
+    $(document).on('change', '.checkout #billing_country', function(){
+        let country = jQuery(this).val();
+
+        $('.rpi-ajax-loader').addClass('loading');
+
+        $.ajax({
+            type: 'POST',
+            url: wc_add_to_cart_params.ajax_url,
+            data : {
+                //action: 'handle_currency',
+                action: 'handle_shipping_country_change',
+                country: country
+            },
+            success: function (data) {
+                //
+            }
+        });
+
+        setTimeout(function(){
+            location.reload();
+        }, 1000);
+
+        $('body').trigger('update_checkout');
+    });
+
+    $(document).on('change', '.checkout #shipping_country', function(){
+        let country = jQuery(this).val();
+
+        $('.rpi-ajax-loader').addClass('loading');
+
+        $.ajax({
+            type: 'POST',
+            url: wc_add_to_cart_params.ajax_url,
+            data : {
+                action: 'handle_shipping_country_change',
+                country: country
+            },
+            success: function (data) {
+                //
+            }
+        });
+        
+        setTimeout(function(){
+            location.reload();
+        }, 1000);
+    });
+
+    $(document).on('click', '.popup-close', function () {
+        $(this).closest('.popup-holder').fadeOut('fast');
+    });
+
+    $(document).on('click', '[data-show-popup]', function () {
+        const target = $(this).data('show-popup');
+        $(target).fadeIn('fast');
+    });
+
+    $(document).on('click', '.btn-discussion-reply-show, .btn-discussion-reply-close', function () {
+        const comment = $(this).closest('.discussion-comment');
+        comment.find('.btn-discussion-reply-show').first().toggle();
+        comment.find('.discussion-reply-form').first().toggle();
+    });
+
+    $(document).on('click', '.btn-discussion-show-children', function () {
+        const comment = $(this).closest('.discussion-comment');
+        comment.find('.discussion-comment-children-list').toggle();
+    });
+
+    $(document).on('submit', 'form[name=discussion_form], form[name=discussion_reply_form]', function (e) {
+        e.preventDefault();
+
+        const form = $(this);
+
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: form.serialize(),
+            beforeSend: function () {
+                $('.rpi-ajax-loader').addClass('loading');
+                $('.discussion-comment').removeClass('focus');
+            },
+            complete: function () {
+                $('.rpi-ajax-loader').removeClass('loading');
+                $('#discussion-popup').fadeOut('fast');
+                form.get(0).reset();
+            },
+            success: function (response) {
+                if (response.error) {
+                    alert(response.message);
+                }
+
+                if (response.success) {
+                    $('.discussion-content').html(response.html);
+                    $('#discussion-comment-' + response.comment_id).addClass('focus').get(0).scrollIntoView({behavior: 'smooth'});
+                }
+            },
+        });
+    });
+
+    $(document).on('click', '.switch-view-btn', function () {
+        const view = $(this).data('switch-view');
+
+        $('.switch-view-btn').removeClass('active');
+
+        view === 'grid' ? $('.products').attr('class', 'products columns-4') : $('.products').attr('class', 'products use-list');
+
+        $(this).addClass('active');
+    })
+
+    function update_cart() {
+        setTimeout(function () {
+            $('button[name="update_cart"]').trigger('click');
+        }, 30);
+    }
+
+    $('form.newsletter-form').submit(function (e) {
+        e.preventDefault();
+
+        let form = $(this),
+            email = form.find('input[name=email]').val(),
+            action = form.find('input[name=action]').val();
+
+
+        let data = {
+            action: action,
+            email: email
+        };
+
+        $.ajax({
+            type: 'post',
+            url: wc_add_to_cart_params.ajax_url,
+            data: data,
+            beforeSend: function () {
+                $('.rpi-ajax-loader').addClass('loading');
+            },
+            complete: function () {
+                $('.rpi-ajax-loader').removeClass('loading');
+            },
+            success: function (response) {
+                Swal.fire({
+                    title: response.message,
+                    icon: response.type,
+                    toast: true,
+                    timer: 2000,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                });
+
+                form.get(0).reset();
+            },
+        });
+    });
+
+    jQuery('form[name="register-form"]').on('submit', function (e) {
+        e.preventDefault();
+
+        let form = jQuery(this);
+        let data = form.serialize();
+
+        jQuery.ajax({
+            url: wc_add_to_cart_params.ajax_url,
+            type: 'post',
+            data: data,
+            dataType: 'json',
+            beforeSend: function () {
+                $('.rpi-ajax-loader').addClass('loading');
+            },
+            complete: function () {
+                $('.rpi-ajax-loader').removeClass('loading');
+            },
+            success: function (response) {
+                Swal.fire({
+                    title: response.message,
+                    icon: response.type,
+                    toast: true,
+                    timer: 2000,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                });
+
+                if (response.type === 'success') {
+                    form.get(0).reset();
+                }
+
+                window.scrollTo(0, 0);
+
+                if (response.redirect){
+                    window.location.href= response.redirect;
+                }
+            },
+            fail: function (err) {
+                console.log(err);
+            },
+        });
+
+    });
+
+    $('[data-top-show-more]').on('click', function () {
+        let ele = $(this);
+        let target = ele.closest('.top-products').find('.top-products-list');
+        target.toggleClass('show');
+
+        ele.toggleClass('active');
+
+        (target.hasClass('show')) ? ele.text(ele.data('hide-text')) : ele.text(ele.data('show-text'));
+    });
+
+    $('.mega-menu .menu-item.has-sub > .menu-item-link:not(.hover)').on('mouseenter', function (e) {
+        e.preventDefault();
+
+        $('.menu-item-link.hover').removeClass('hover');
+
+        $(this).addClass('hover');
+
+        if ($(this).hasClass('hover')) {
+            return;
+        }
+
+        $('.menu-item-submenu.active').removeClass('active');
+        $(this).closest('.menu-item').find('.menu-item-submenu').addClass('active');
+    });
+
+    $('.mega-menu .multi-tab-btn').on('mouseenter', function (e) {
+        e.preventDefault();
+
+        let tabtn = $(this);
+        let tab = tabtn.data('multi-tab');
+
+        let parent = tabtn.closest('.menu-item-submenu');
+
+        parent.find('.multi-tab-btn.active').removeClass('active');
+
+        parent.find('.multi-tab-content.active').removeClass('active');
+
+        tabtn.addClass('active');
+        parent.find('.multi-tab-' + tab).addClass('active');
+    });
+
+    $('.category-btn-expand').on('click', function() {
+        $('.category-description').removeClass('strip');
+        $(this).remove();
+    });
+
+    $('.mobile-filter-expand').on('click', function () {
+        $('.filters-wrapper').fadeToggle('fast');
+    });
+
+    $(document).on('submit', 'form[data-ajax]',function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+
+        $.ajax({
+            type: 'post',
+            url: '/wp-admin/admin-ajax.php',
+            data: form.serialize(),
+            beforeSend: function () {
+                $('.ajax__loader').addClass('loading');
+            },
+            complete: function () {
+                $('.ajax__loader').removeClass('loading');
+            },
+            success: function (response) {
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                }
+
+                let timer = 2000;
+
+                if (response.timer) {
+                    timer = response.timer;
+                }
+
+                Swal.fire({
+                    title: response.message,
+                    icon: response.type,
+                    toast: true,
+                    timer: timer,
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    position: 'top-end'
+                });
+
+                if (response.type === 'success') {
+                    form.get(0).reset();
+                }
+            }
+        });
+    });
+
+    $(document).on('change', '#billing_dic',function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            type: 'post',
+            url: '/wp-admin/admin-ajax.php',
+            data: {
+                action: 'is_customer_vat_exempt'
+            },
+            success: function (response) {
+                if (!response.vat_exempt) {
+                    $('.billing-vat-exempt').hide();
+                }
+            }
+        });
+    });
+
+    $(document.body).on('click', '.page-numbers:not(.current)', function () {
+        $('html, body').animate({
+            scrollTop: $('#products_top').offset().top - 50
+        }, 500);
+    });
+
+    $.ajax({
+        type: 'post',
+        url: '/wp-admin/admin-ajax.php',
+        data: {
+            'action': 'load_user_menu'
+        },
+        success: function (response) {
+            $('#account-menu-item').html(response.html);
+        }
+    });
+
+    $(document).on('click', '[data-validate-shipping]', function (e) {
+        const country = $('#billing_country').val();
+        let vat = (country === 'SK') ? $('#billing_dic_dph').val() : $('#billing_dic').val();
+
+        if (country === 'CZ') {
+            return;
+        }
+
+        let text = (vat === '') ? 'Počkejte prosím.' : 'Počkejte prosím, momentálně ověřujeme <b>DIČ</b>.';
+
+        $(document.body).append('<div class="rpi-vat-loader"><div><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Icons" x="0px" y="0px" viewBox="0 0 32 32" style="enable-background:new 0 0 32 32;" xml:space="preserve"><style type="text/css">.st0{ fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10; }</style><line class="st0" x1="16" y1="3" x2="16" y2="8"></line><line class="st0" x1="6.8" y1="6.8" x2="10.3" y2="10.3"></line><line class="st0" x1="3" y1="16" x2="8" y2="16"></line><line class="st0" x1="6.8" y1="25.2" x2="10.3" y2="21.7"></line><line class="st0" x1="16" y1="29" x2="16" y2="24"></line><line class="st0" x1="25.2" y1="25.2" x2="21.7" y2="21.7"></line><line class="st0" x1="29" y1="16" x2="24" y2="16"></line><line class="st0" x1="25.2" y1="6.8" x2="21.7" y2="10.3"></line></svg><span>' + text + '</span></div></div>');
+
+        $.ajax({
+            type: 'post',
+            url: '/wp-admin/admin-ajax.php',
+            data: {
+                'action': 'check_user_vat',
+                'vat': vat,
+                'country': country
+            },
+            beforeSend: function () {
+                $('.billing-vat-exempt').hide();
+            },
+            complete: function () {
+                $('.rpi-vat-loader').remove();
+            },
+            success: function (response) {
+                if (!response.skip_message) {
+                    Swal.fire({
+                        title: response.message,
+                        icon: response.type,
+                        toast: true,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        showCloseButton: true,
+                        position: 'center'
+                    });
+                }
+
+                $('body').trigger('update_checkout');
+
+                if (response.type === 'success') {
+                    $('.billing-vat-exempt').show();
+                }
+            }
+        });
+    });
+
+    setTimeout(function(){
+        $('.product-badges .badge-link.sale').each(function(){
+            let badge = $(this);
+
+            if (badge.text() === 'Sleva 0%') {
+                badge.remove();
+            }
+        });
+    }, 600);
+});

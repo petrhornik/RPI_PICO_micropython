@@ -1,0 +1,52 @@
+jQuery(document).ready(function($) {
+
+    $(document).on('click', '.btn-notifier', function (e) {
+        e.preventDefault();
+
+        $('#notifier-popup').fadeToggle('fast');
+    });
+
+    $('form[name=notifier_form]').submit(function (e) {
+       e.preventDefault();
+
+        let form = $(this),
+            product_id = form.find('input[name=product_id]').val(),
+            email = form.find('input[name=email]').val();
+
+
+        let data = {
+            action: 'add_notify',
+            product_id: product_id,
+            email: email
+        };
+
+       $.ajax({
+           type: 'post',
+           url: wc_add_to_cart_params.ajax_url,
+           data: data,
+           beforeSend: function(){
+               $('.rpi-ajax-loader').addClass('loading');
+           },
+           complete: function(){
+               $('.rpi-ajax-loader').removeClass('loading');
+               $('#notifier-popup').fadeOut('fast');
+           },
+           success: function (response) {
+               Swal.fire({
+                   title: response.message,
+                   icon: response.type,
+                   toast: true,
+                   timer: 2000,
+                   showConfirmButton: false,
+                   showCloseButton: true,
+                   customClass: {
+                       'title': 'mb-4'
+                   }
+               });
+
+               form.get(0).reset();
+           },
+       });
+    });
+
+});

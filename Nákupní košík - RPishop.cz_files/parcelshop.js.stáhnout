@@ -1,0 +1,100 @@
+const initModal = () => {
+    const modal = document.createElement("div");
+    modal.classList.add("ppl-popup");
+    modal.classList.add("show");
+
+    const modalContent = document.createElement("div");
+    modalContent.classList.add("content");
+
+    const closeBtn = document.createElement("div");
+    closeBtn.classList.add("close");
+
+    closeBtn.addEventListener("click", () => {
+        modal.remove();
+    });
+
+    const country = document.querySelector('#ppl-parcelshop-country').value;
+
+    const parcelshopMap = document.createElement("div");
+    parcelshopMap.id = "ppl-parcelshop-map";
+    parcelshopMap.dataset.country = country.toLowerCase();
+
+    modalContent.appendChild(parcelshopMap);
+    modal.appendChild(closeBtn);
+    modal.appendChild(modalContent);
+
+    document.body.appendChild(modal);
+
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "https://www.ppl.cz/sources/map/main.js";
+    script.async = true;
+    document.head.appendChild(script);
+
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "https://www.ppl.cz/sources/map/main.css";
+    document.head.appendChild(style);
+}
+
+document.addEventListener(
+    "ppl-parcelshop-map",
+    (event) => {
+        let id = event.detail.code;
+        let name = event.detail.name;
+        let address = event.detail.street + ' ' + event.detail.city + ' ' + event.detail.zipCode;
+        let street = event.detail.street;
+        let city = event.detail.city;
+        let zip = event.detail.zipCode;
+        let country = event.detail.country;
+
+        let parcelshopName = event.detail.parcelshopName;
+
+        jQuery.ajax({
+            type: "POST",
+            url: '/wp-admin/admin-ajax.php',
+            data: {
+                action: 'save_selected_parcelshop',
+                data: {
+                    id: id,
+                    name: name,
+                    address: address,
+                    street: street,
+                    city: city,
+                    zip: zip,
+                    country: country,
+                    parcelshopName: parcelshopName
+                }
+            },
+            success: function(data) {
+                if (data.success === false) {
+                    console.log(data.message);
+
+                    return;
+                }
+
+                jQuery('.ppl-popup').remove();
+
+                jQuery('.parcelshop-info-wrapper').html(data.html);
+            }
+        });
+    }
+);
+
+jQuery(document).on('click', '.change-parcelshop', function(e) {
+    e.preventDefault();
+
+    initModal();
+});
+
+jQuery(document).on('change', 'input[name="shipping_method[0]"]', function() {
+    const shipping_method = jQuery('input[name="shipping_method[0]"]:checked').val();
+
+    const shipping_method_name = shipping_method.split(':')[0];
+
+    if (shipping_method_name !== 'ppl_parcel') {
+        jQuery('.parcelshop-info').remove();
+    } else {
+        initModal();
+    }
+});

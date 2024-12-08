@@ -1,0 +1,203 @@
+
+            var FoxentryClientData = {"country":{"code":"CZ","name":"Czechia"},"city":"Hradec Králové","postal":"500 02","gps":{"latitude":50.208,"longitude":15.8264},"ip":"89.248.248.22"};
+            Foxentry.loadConfig({"options":{"active":true,"validationNextInputAutojump":true,"validationResultVisual":"extended","customValidationHandlers":"false","browserAutocomplete":"true","restrictions":{"countryLimit":[],"creditsPerDay":-1,"creditsPerIp":-1,"restrictionsIp":[{"ip":"*","status":"1"}],"countryLimited":"false"},"whisperVersion":2,"whisperAdBox":true,"onLoadValidation":true,"allowIframeRun":false},"address":{"options":{"active":true,"limits":{"results":13,"resultsPersonalized":5},"addressCityExtended":"minimal","addressPartsRelation":true,"useGeolocation":true,"zipFormat":"default","addressValidity":"full","validityRequired":true},"data":[]},"name":{"options":{"active":true,"validityRequired":true},"data":[]},"email":{"options":{"active":true,"validationType":"extended","validityRequired":true},"data":[]},"phone":{"options":{"active":true,"validationType":"basic","outputFormatted":"true","validityType":"true","allowedPrefixes":[],"defaultPrefix":"+420","defaultPrefixFillInput":"false","validityRequired":true},"data":[]},"company":{"options":{"active":true,"limits":{"results":13,"resultsPersonalized":5},"validityFull":"true","limit":5,"limitUsed":3,"validityRequired":true,"companyNameFormat":"standardized"},"data":[]},"callbacks":[]});
+            var FoxentryBuilder = new FoxentryBuilderLib();
+            var FoxentryBillingType = "plan";
+            var FoxentryRequestsUsageData = {"requestsInLimitLeft":{"addressSearch":40972,"addressValidations":0,"companySearch":25802,"companyValidations":2425,"emailValidations":0,"phoneValidations":0,"nameValidations":0,"dataFills":4500},"requestsOverLimit":{"addressSearch":0,"addressValidations":992,"companySearch":0,"companyValidations":0,"emailValidations":653,"phoneValidations":813,"nameValidations":390,"dataFills":0},"overlimitAllowed":true};
+            var clientIp = "89.248.248.22";
+            var FoxentryWebsiteCms = "custom";
+            var cached = true;
+            var FoxentryClientToken = "6gLX2dedrRjNv5/8GVEdnWJkX3muYdl2X3ffVrMfxkxLeyeUcG0sNiccP6rR6/PKTWm6YBAZO7NQGY7t82RLa3BEdV0gC/BP8cYlTJqREklkPN90xzJnkTCVd8cXSuHU+75Taku9YehWFtrtbMWDSGahto9TzFmY7ZBvfuecQlMy+Zbk5dIDTwh3pxKxAxwSJ61RWF/K0xqnoP9KFs4xK1+/RbdMUDCH81EgetzeMRWF2aZmKw==";
+            var FoxentryMessages = {"whisper.banner.footer":"Používáme Foxentry.com"};
+            var FoxentryProjectProviderCountry = "cz";
+
+            var FoxentryLearningModeAllowed = true;
+
+            var FoxentryBillingPlanFree = false;
+            var FoxentryLearningMode = false;
+
+                                        FoxentryBuilder.validatorAdd("address", "Adresa č. 1");
+                            FoxentryBuilder.validatorMappingsAdd(
+                            "address",
+                            "Adresa č. 1",
+                            [
+                                                            {
+                                element  : "[name='shipping_address_1']",
+                                dataType : "streetWithNumber",
+                                dataTypeOut : "streetWithNumber"
+
+                                },
+                                                                {
+                                element  : "[name='shipping_city']",
+                                dataType : "city",
+                                dataTypeOut : "city"
+
+                                },
+                                                                {
+                                element  : "[name='shipping_postcode']",
+                                dataType : "zip",
+                                dataTypeOut : "zip"
+
+                                },
+                                                            ],
+                            [
+                                                        ]
+                            );
+                                                            FoxentryBuilder.validatorSetOptions("address", "Adresa č. 1", {"validityRequired":"false","validationVisualShowtype":"all","countrySelectMode":"prefer","autofixByPartialNumber":"true"});
+                                                            FoxentryBuilder.validatorAdd("address", "Fakturační adresa");
+                            FoxentryBuilder.validatorMappingsAdd(
+                            "address",
+                            "Fakturační adresa",
+                            [
+                                                            {
+                                element  : "[name='billing_address_1']",
+                                dataType : "streetWithNumber",
+                                dataTypeOut : "streetWithNumber"
+
+                                },
+                                                                {
+                                element  : "[name='billing_city']",
+                                dataType : "city",
+                                dataTypeOut : "city"
+
+                                },
+                                                                {
+                                element  : "[name='billing_postcode']",
+                                dataType : "zip",
+                                dataTypeOut : "zip"
+
+                                },
+                                                            ],
+                            [
+                                                        ]
+                            );
+                                                            FoxentryBuilder.validatorSetOptions("address", "Fakturační adresa", {"validityRequired":"false","validationVisualShowtype":"all","countrySelectMode":"prefer","autofixByPartialNumber":"true"});
+                                                            FoxentryBuilder.validatorAdd("name", "Jméno č. 1");
+                            FoxentryBuilder.validatorMappingsAdd(
+                            "name",
+                            "Jméno č. 1",
+                            [
+                                                            {
+                                element  : "[name='shipping_first_name']",
+                                dataType : "name",
+                                dataTypeOut : "name"
+
+                                },
+                                                                {
+                                element  : "[name='shipping_last_name']",
+                                dataType : "surname",
+                                dataTypeOut : "surname"
+
+                                },
+                                                            ],
+                            [
+                                                        ]
+                            );
+                                                            FoxentryBuilder.validatorSetOptions("name", "Jméno č. 1", {"validityRequired":"false","validationVisualShowtype":"onlyvalid","countrySelectMode":"prefer"});
+                                                            FoxentryBuilder.validatorAdd("name", "Jméno č. 2");
+                            FoxentryBuilder.validatorMappingsAdd(
+                            "name",
+                            "Jméno č. 2",
+                            [
+                                                            {
+                                element  : "[name='billing_first_name']",
+                                dataType : "name",
+                                dataTypeOut : "name"
+
+                                },
+                                                                {
+                                element  : "[name='billing_last_name']",
+                                dataType : "surname",
+                                dataTypeOut : "surname"
+
+                                },
+                                                            ],
+                            [
+                                                        ]
+                            );
+                                                            FoxentryBuilder.validatorSetOptions("name", "Jméno č. 2", {"validityRequired":"false","validationVisualShowtype":"all"});
+                                                            FoxentryBuilder.validatorAdd("email", "E-mail č. 1");
+                            FoxentryBuilder.validatorMappingsAdd(
+                            "email",
+                            "E-mail č. 1",
+                            [
+                                                            {
+                                element  : "[name='billing_email']",
+                                dataType : "email",
+                                dataTypeOut : "email"
+
+                                },
+                                                            ],
+                            [
+                                                        ]
+                            );
+                                                            FoxentryBuilder.validatorSetOptions("email", "E-mail č. 1", {"validityRequired":"false","validationVisualShowtype":"onlyvalid"});
+                                                            FoxentryBuilder.validatorAdd("phone", "Telefon č. 1");
+                            FoxentryBuilder.validatorMappingsAdd(
+                            "phone",
+                            "Telefon č. 1",
+                            [
+                                                            {
+                                element  : "[name='billing_phone']",
+                                dataType : "phoneNumber",
+                                dataTypeOut : "phoneNumber"
+
+                                },
+                                                            ],
+                            [
+                                                        ]
+                            );
+                                                            FoxentryBuilder.validatorSetOptions("phone", "Telefon č. 1", {"validityRequired":"true","validationVisualShowtype":"all","defaultPrefix":"+420","defaultPrefixFillInput":"false","numberOutputFormat":"international"});
+                                                            FoxentryBuilder.validatorAdd("company", "Firma č. 1");
+                            FoxentryBuilder.validatorMappingsAdd(
+                            "company",
+                            "Firma č. 1",
+                            [
+                                                            {
+                                element  : "[name='billing_company']",
+                                dataType : "name",
+                                dataTypeOut : "name"
+
+                                },
+                                                                {
+                                element  : "[name='billing_ic']",
+                                dataType : "registrationNumber",
+                                dataTypeOut : "registrationNumber"
+
+                                },
+                                                                {
+                                element  : "[name='billing_dic']",
+                                dataType : "taxNumber",
+                                dataTypeOut : "taxNumber"
+
+                                },
+                                                                {
+                                element  : "[name='billing_address_1']",
+                                dataType : "address.streetWithNumber",
+                                dataTypeOut : "address.streetWithNumber"
+
+                                },
+                                                                {
+                                element  : "[name='billing_city']",
+                                dataType : "address.city",
+                                dataTypeOut : "address.city"
+
+                                },
+                                                                {
+                                element  : "[name='billing_postcode']",
+                                dataType : "address.zip",
+                                dataTypeOut : "address.zip"
+
+                                },
+                                                            ],
+                            [
+                                                            {
+                                element  : "[name='billing_dic_dph']",
+                                dataType : "vatNumber",
+
+                                },
+                                                            ]
+                            );
+                                                            FoxentryBuilder.validatorSetOptions("company", "Firma č. 1", {"validityRequired":"false","validationVisualShowtype":"onlyvalid","countrySelectMode":"prefer"});
+                                                Foxentry.ready();
+                

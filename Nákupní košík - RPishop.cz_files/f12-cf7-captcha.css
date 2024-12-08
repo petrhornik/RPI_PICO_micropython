@@ -1,0 +1,87 @@
+.c-header {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.c-header > div {
+  padding-right: 3px;
+}
+
+/**
+ * @since 2.0.62
+ */
+.f12-captcha {
+  display: block;
+  width: 100%;
+}
+
+.f12-captcha.template-1 {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px 15px 15px 15px;
+  position: relative;
+  border-radius: 3px;
+}
+.f12-captcha.template-1 .c-label {
+  left: 10px;
+  font-size: 12px;
+  color: #777;
+}
+.f12-captcha.template-1 .c-data {
+  font-size: 1.05rem;
+}
+.f12-captcha.template-1 .c-input {
+  display: flex;
+  flex-flow: row nowrap;
+}
+.f12-captcha.template-1 .c-header {
+  border: 1px solid #ccc;
+  padding: 5px 5px 5px 10px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 3px;
+}
+.f12-captcha.template-1 .c-hint {
+  font-size: 12px;
+  margin-left: -10px;
+  color: #777;
+  line-height: 100%;
+}
+.f12-captcha.template-1 .c-reload {
+  padding: 0;
+}
+.f12-captcha.template-1 .c-reload a {
+  background-color: #2196f3;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  border-radius: 3px;
+}
+.f12-captcha.template-1 .c-reload a img {
+  margin: 0 !important;
+  align-self: center;
+  width: 16px !important;
+  height: 16px !important;
+}
+.f12-captcha.template-1 input.f12c {
+  display: block;
+  border: 0px solid #ccc;
+  margin-left: -10px;
+  background-color: #fff;
+  font-size: 1.05rem;
+  padding: 3px;
+  max-width: 100px;
+  height: 24px;
+}
+.f12-captcha.template-1 input.f12c:focus {
+  border: 0;
+  outline: 0;
+}
+
+/*# sourceMappingURL=f12-cf7-captcha.css.map */
