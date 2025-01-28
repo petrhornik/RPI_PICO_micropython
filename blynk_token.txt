@@ -1,0 +1,2 @@
+#define BLYNK_TEMPLATE_NAME "RPI PICO W"
+#define BLYNK_AUTH_TOKEN "vvv0adhdw1TPtMBMQCqwWzG_gdIbUEkT"
