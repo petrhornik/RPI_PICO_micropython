@@ -1,3 +1,5 @@
+# Copyright (c) 2015-2019 Volodymyr Shymanskyy. See the file LICENSE for copying permission.
+
 __version__ = "1.0.0"
  
 import struct
